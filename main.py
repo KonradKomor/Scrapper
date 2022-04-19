@@ -44,3 +44,4 @@ if __name__ == '__main__':
 
     scrapper = Scrapper("komor.konrad0@gmail.com", "TwitterScraper", "C:/Users/konra/chromedriver.exe","@Konrad38611406")
     scrapper.logInToTwitter()
+    scrapper.findPostsAboutTopic()
