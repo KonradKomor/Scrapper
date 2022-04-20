@@ -12,7 +12,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import Chrome
 
 from Scrapper import Scrapper
-
+from Tweets import Tweets
 
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
@@ -21,27 +21,25 @@ def print_hi(name):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    """driver.get('https://www.twitter.com/login')
-    search = driver.find_element_by_name("username")
-    search.send_keys(mail)
-    Next = driver.find_element_by_xpath("//span[.='Dalej']")
-    Next.click()
-    password = driver.find_element_by_xpath('//input[@name="session[password]"]')
-    password.send_keys(twitterPassword)
-    password.send_keys(Keys.RETURN)
-    search_input = driver.find_element_by_xpath('//input[@aria-label="Search query"]')
-    search_input.send_keys('#polskiład')
-    search_input.send_keys(Keys.RETURN)
-    driver.find_element_by_link_text('Latest').click()
-    cards = driver.find_elements_by_xpath('//div[@data-testid="tweet"]')
-    card = cards[0]
-    card.find_element_by_xpath('./div[2]/div[1]//span').text
-    # twitter handle
-    card.find_element_by_xpath('.//span[contains(text(), "@")]').text
-    card.find_element_by_xpath('.//time').get_attribute('datetime')
-    card.find_element_by_xpath('.//div[2]/div[2]/div[1]').text
-    card.find_element_by_xpath('.//div[@data-testid="reply"]'). """
-
+    tweetDataList=[]
+    tweetIds=set()
     scrapper = Scrapper("komor.konrad0@gmail.com", "TwitterScraper", "C:/Users/konra/chromedriver.exe","@Konrad38611406")
     scrapper.logInToTwitter()
     scrapper.findPostsAboutTopic()
+    while True:
+        tweets=Tweets(scrapper.getTweets())
+        for tweet in tweets.tweetsList:
+            data=tweets.getTweetData(tweet)
+            if data:
+                tweetId=''.join(data)
+                if tweetId not in tweetIds:
+                    tweetIds.add(tweetId)
+                    tweetDataList.append(data)
+        scrapper.scrollDown()
+        if len(tweetDataList) == 5000:
+            break
+    with open('tweets.csv','w',newline='',encoding='utf-8') as f:
+        header = ['Username','Timestamp','Text']
+        writer=csv.writer(f)
+        writer.writerow(header)
+        writer.writerows(tweetDataList)

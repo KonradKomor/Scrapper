@@ -19,6 +19,8 @@ class Scrapper:
         self.driver = Chrome(self.path)
         self.driver.maximize_window()
         self.driver.get('https://www.twitter.com/login')
+        self.lastPosition=set()
+        self.currentPosition=set()
     def logInToTwitter(self):
         time.sleep(2)
         mailInput = self.driver.find_element(By.XPATH, self.emailInputXpath)
@@ -44,8 +46,14 @@ class Scrapper:
             searchBarInput = self.driver.find_element(By.XPATH,searchBarXpath)
             searchBarInput.send_keys("polski ład")
             searchBarInput.send_keys(Keys.RETURN)
-            latestXpath='//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[2]/nav/div/div[2]/div/div[2]/a/div/span'
-            self.driver.find_element(By.XPATH,latestXpath).click()
             sleep(2)
-            cards = self.driver.find_elements(By.XPATH,'//article[@data-testid="tweet"]')
-            print(cards)
+            latestXpath = '//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[2]/nav/div/div[2]/div/div[2]/a/div/span'
+            self.driver.find_element(By.XPATH, latestXpath).click()
+    def getTweets(self):
+        tweets = self.driver.find_elements(By.XPATH,'//article[@data-testid="tweet"]')
+        self.lastPosition=self.driver.execute_script("return window.pageYoffset;")
+        return tweets
+    def scrollDown(self):
+        self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+        time.sleep(1)
+        self.currentPosition=self.driver.execute_script("return window.pageYOffset;")
