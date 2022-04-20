@@ -11,8 +11,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import Chrome
 
-from Scrapper import Scrapper
-from Tweets import Tweets
+from ScrapperService import ScrapperService
+from DriverConfigurator import DriverConfigurator
+from TweetsService import TweetsService
+
 
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
@@ -21,25 +23,27 @@ def print_hi(name):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    tweetDataList=[]
-    tweetIds=set()
-    scrapper = Scrapper("komor.konrad0@gmail.com", "TwitterScraper", "C:/Users/konra/chromedriver.exe","@Konrad38611406")
+    tweetDataList = []
+    tweetIds = set()
+    driver = DriverConfigurator("C:/Users/konra/chromedriver.exe")
+    driver = driver.OpenDriver()
+    scrapper = ScrapperService("komor.konrad0@gmail.com", "TwitterScraper", "@Konrad38611406", driver)
     scrapper.logInToTwitter()
-    scrapper.findPostsAboutTopic()
+    driver=scrapper.findPostsAboutTopic("Polski ład")
     while True:
-        tweets=Tweets(scrapper.getTweets())
-        for tweet in tweets.tweetsList:
-            data=tweets.getTweetData(tweet)
+        tweets = TweetsService(driver)
+        for tweet in tweets.getTweets():
+            data = tweets.getTweetData(tweet)
             if data:
-                tweetId=''.join(data)
+                tweetId = ''.join(data)
                 if tweetId not in tweetIds:
                     tweetIds.add(tweetId)
                     tweetDataList.append(data)
-        scrapper.scrollDown()
-        if len(tweetDataList) == 5000:
+        tweets.scrollDown()
+        if len(tweetDataList) > 20:
             break
-    with open('tweets.csv','w',newline='',encoding='utf-8') as f:
-        header = ['Username','Timestamp','Text']
-        writer=csv.writer(f)
+    with open('tweets.csv', 'w', newline='', encoding='UTF-8') as f:
+        header = ['Username', 'Timestamp', 'Text']
+        writer = csv.writer(f)
         writer.writerow(header)
         writer.writerows(tweetDataList)
